@@ -6,27 +6,31 @@ const COLOR_YELLOW = 'yellow';
 const COST_OF_SINGLE_PLAY = 10;
 const MULTIPLIER_FACTOR = 5;
 
-var userFloat = 100;
-var machineFloat = 1000;
-
-var userFreePlays = 0;
-
 let slots = new Array(4);
 
 const playerMachine = {
-  play() {
+  play(machineFloat, userFloat, userFreePlays = 0) {
     for (let i = 0; i <= 3; i++) {
       slots[i] = this.mapColors(this.getRandomNumber());
     }
 
-    // deduct user credits
-    if (userFreePlays === 0) {
-      userFloat -= COST_OF_SINGLE_PLAY;
-      machineFloat += COST_OF_SINGLE_PLAY;
+    let prizeResults;
+
+    if (this.hasPlayerWon(slots)) {
+      userFloat += machineFloat;
+      machineFloat = 0;
+
+      prizeResults = { machineFloat, userFloat, userFreePlays };
+    } else {
+      prizeResults = this.updateFloats(
+        slots,
+        machineFloat,
+        userFloat,
+        userFreePlays
+      );
     }
 
-    // check prizing
-    this.updateFloat();
+    return { ...prizeResults, slots };
   },
 
   getRandomNumber() {
@@ -56,12 +60,12 @@ const playerMachine = {
     }
   },
 
-  hasPlayerWon() {
+  hasPlayerWon(slots) {
     const winningColor = slots[0];
     return slots.every((color) => color === winningColor);
   },
 
-  updateFloat() {
+  updateFloats(slots, machineFloat, userFloat, userFreePlays) {
     let prize = 0;
 
     if ([...new Set(slots)].length === 4) {
@@ -70,7 +74,7 @@ const playerMachine = {
       userFloat += prize;
       machineFloat -= prize;
 
-      return;
+      return { machineFloat, userFloat, userFreePlays };
     }
 
     const hasSimilarColorsAdjacent = slots.some((color, index) => {
@@ -92,16 +96,12 @@ const playerMachine = {
         machineFloat = 0;
       }
     }
+
+    return { userFloat, machineFloat, userFreePlays };
   },
 };
 
 console.log('Player machine');
-playerMachine.play();
-console.log({
-  playerWon: playerMachine.hasPlayerWon(),
-  userFloat,
-  machineFloat,
-  combination: slots,
-});
+// console.log(playerMachine.play(1000, 100));
 
 module.exports = playerMachine;
