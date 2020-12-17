@@ -102,6 +102,6 @@ const playerMachine = {
 };
 
 console.log('Player machine');
-// console.log(playerMachine.play(1000, 100));
+console.log(playerMachine.play(1000, 100));
 
 module.exports = playerMachine;
